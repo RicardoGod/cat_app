@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cat_app.R
 import com.example.cat_app.data.models.BreedsModel
-import com.example.cat_app.viewmodel.BreedsViewModel
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 
@@ -32,7 +31,7 @@ import com.google.accompanist.pager.PagerState
 fun OnboardingCarousel(
     breeds: List<BreedsModel>,
     pagerState: PagerState,
-    viewModel: BreedsViewModel)
+    viewModel: BreedsViewModel_change)
 {
 
     if (breeds.isNotEmpty()) {

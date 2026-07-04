@@ -17,6 +17,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,42 +25,39 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.cat_app.data.models.BreedsModel
 import com.example.cat_app.ui.components.utils.BreedDialog
 import com.example.cat_app.ui.components.utils.BreedItemCard
-import com.example.cat_app.viewmodel.FavouritesViewModel
-import com.example.cat_app.viewmodel.SearchViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenFavorites(
-    favouriteViewModel: FavouritesViewModel = koinViewModel(),
-    searchViewModel: SearchViewModel,
-    navigateBack: () -> Unit = {}) {
-
+fun ScreenFavoritesDeprecated(viewModel: BreedsViewModel_change, navigateBack: () -> Unit = {}) {
     //current context of the composable
     val context = LocalContext.current
-
+    //state of the lazy list for scroll position
+    val listState = rememberLazyListState()
     //current text entered in the search bar
-    var searchQuery by remember { searchViewModel.searchQuery }
-
-    var favouriteScreenState by remember {favouriteViewModel.state }
-
-    var scrollState = rememberLazyListState()
-
+    var searchQuery by remember { mutableStateOf("") }
+    //list of favorite breeds from the ViewModel
+    val favorites = remember { derivedStateOf { viewModel.favorites.distinctBy { it.imageId } } }
+    //list of favorite breeds from the ViewModel
+    val favorites_viewmodel = viewModel.favorites
     //controls visibility of the detail dialog
-    var showDialog by remember { mutableStateOf(favouriteViewModel.state.value.selected) }
-
+    var showDialog by remember { mutableStateOf(false) }
+    //currently selected breed for detail view
+    var selectedBreed by remember { mutableStateOf<BreedsModel?>(null) }
 
     //clears search data when the screen is disposed
     DisposableEffect(Unit) {
         onDispose {
-            searchViewModel.clearSearch()
+            viewModel.clearSearch()
         }
     }
     //loads initial data when the screen is first displayed
     LaunchedEffect(Unit) {
-        favouriteViewModel.fetchFavorites(context)
+        viewModel.fetchFavorites(context)
+        viewModel.fetchBreeds(context)
+        viewModel.searchBreeds(context, searchQuery)
     }
 
     Scaffold(
@@ -75,7 +73,7 @@ fun ScreenFavorites(
         }
     ) { padding ->
         when {
-            favouriteScreenState.data.isEmpty() -> {
+            favorites.value.isEmpty() -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -88,14 +86,13 @@ fun ScreenFavorites(
             else -> {
                 //list of found it
                 LazyColumn(
-                    state = scrollState,
+                    state = listState,
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxSize()
                 ) {
-                    items(favouriteScreenState.data.size) {
-                        fav ->
-                        val breed = favouriteScreenState.data.find { it.imageId == fav.imageId }
+                    items(favorites.value) { fav ->
+                        val breed = viewModel.breedItems.find { it.referenceImageId == fav.imageId }
                         val isFavorite =
                             favorites_viewmodel.any { it.imageId == breed?.referenceImageId }
                         if (breed != null) {
@@ -104,13 +101,13 @@ fun ScreenFavorites(
                                 breed = breed,
                                 onFavoriteClick = {
                                     if (isFavorite) {
-                                        favouriteViewModel.removeFavorite(context, breed)
+                                        viewModel.removeFavorite(context, breed)
                                     } else {
-                                        favouriteViewModel.addFavorite(context, breed)
+                                        viewModel.addFavorite(context, breed)
                                     }
                                 },
                                 isFavorite = isFavorite,
-                                viewModel = favouriteViewModel,
+                                viewModel = viewModel,
                                 onClick = {
                                     selectedBreed = breed
                                     showDialog = true
@@ -125,7 +122,7 @@ fun ScreenFavorites(
                         favorites_viewmodel.any { it.imageId == selectedBreed!!.referenceImageId }
                     BreedDialog(
                         breed = selectedBreed!!,
-                        viewModel = favouriteViewModel,
+                        viewModel = viewModel,
                         isFavorite = isFavorite,
                         onDismiss = { showDialog = false }
                     )

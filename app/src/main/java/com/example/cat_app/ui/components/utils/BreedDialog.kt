@@ -35,14 +35,13 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.cat_app.R
 import com.example.cat_app.data.models.BreedsModel
-import com.example.cat_app.viewmodel.BreedsViewModel
 
 @Composable
 fun BreedDialog(
     breed: BreedsModel,
     isFavorite: Boolean,
     onDismiss: () -> Unit,
-    viewModel: BreedsViewModel
+    viewModel: BreedsViewModel_change
 ) {
     val imageUrl = viewModel.getBreedImageUrl(breed)
 

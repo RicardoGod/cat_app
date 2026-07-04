@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cat_app.R
 import com.example.cat_app.data.models.BreedsModel
-import com.example.cat_app.viewmodel.BreedsViewModel
 
 
 @Composable
@@ -39,7 +38,7 @@ fun BreedItemCard(
     onFavoriteClick: () -> Unit,
     onClick: () -> Unit,
     breed: BreedsModel,
-    viewModel: BreedsViewModel
+    viewModel: BreedsViewModel_change
 ) {
     val imageUrl = viewModel.getBreedImageUrl(breed)
 

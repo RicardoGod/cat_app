@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.cat_app.ui.components.utils.OnboardingCarousel
 import com.example.cat_app.ui.components.utils.SquareButton
-import com.example.cat_app.viewmodel.BreedsViewModel
 import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.delay
 
@@ -28,8 +27,8 @@ import kotlinx.coroutines.delay
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 
-fun ScreenOnboard(
-    viewModel: BreedsViewModel,
+fun ScreenOnboardDeprecated(
+    viewModel: BreedsViewModel_change,
     onNavigateToBreeds: () -> Unit,
     onNavigateToFavorites: () -> Unit,
     onNavigateToAbout: () -> Unit,

@@ -41,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.benchmark.common)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -72,6 +73,9 @@ dependencies {
     implementation(libs.androidx.foundation.android)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
