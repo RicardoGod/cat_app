@@ -35,102 +35,112 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.cat_app.R
 import com.example.cat_app.data.models.BreedsModel
+import com.example.cat_app.ui.features.breeds.model.BreedUi
 
 @Composable
 fun BreedDialog(
-    breed: BreedsModel,
-    isFavorite: Boolean,
-    onDismiss: () -> Unit,
-    viewModel: BreedsViewModel_change
+    breed: BreedUi,
+    onDismiss: () -> Unit
 ) {
-    val imageUrl = viewModel.getBreedImageUrl(breed)
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+
         Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White
         ) {
-            Column(Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = breed.name ?: "",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (isFavorite) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorite",
-                            tint = Color.Red,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "No favorite",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = breed.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        placeholder = painterResource(id = R.drawable.placehold_error),
-                        error = painterResource(id = R.drawable.ic_launcher_cat_foreground),
-                        contentScale = ContentScale.Crop
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append("Origin: ") }
-                    append(breed.origin ?: "Unknown")
-                })
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append("Temperament: ") }
-                    append(breed.temperament ?: "Not provided")
-                })
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append("Description: ") }
-                    append(breed.description ?: "No description")
-                })
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append("Life Span: ") }
-                    append("${breed.lifeSpan ?: "Not available"} years")
-                })
-                Spacer(modifier = Modifier.height(6.dp))
-                breed.weight?.metric?.let { weight ->
-                    Text(buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) { append("Weight (kg): ") }
-                        append(weight)
-                    })
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xFFE57373),
-                        contentColor = Color.White
-                    )
+
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Close")
-                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = breed.name,
+                        modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+
+                    Icon(
+                        imageVector =
+                            if (breed.isFavorite)
+                                Icons.Default.Favorite
+                            else
+                                Icons.Default.FavoriteBorder,
+                        contentDescription = null,
+                        tint =
+                            if (breed.isFavorite)
+                                Color.Red
+                            else
+                                Color.Gray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                AsyncImage(
+                    model = breed.imageUrl.url,
+                    contentDescription = breed.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    placeholder = painterResource(R.drawable.placehold_error),
+                    error = painterResource(R.drawable.ic_launcher_cat_foreground),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                BreedInfoRow(
+                    title = "Origin",
+                    value = breed.origin
+                )
+
+                BreedInfoRow(
+                    title = "Temperament",
+                    value = breed.temperament
+                )
+
+                BreedInfoRow(
+                    title = "Description",
+                    value = breed.description
+                )
+
+                BreedInfoRow(
+                    title = "Life span",
+                    value = "${breed.lifeSpan} years"
+                )
+
+                BreedInfoRow(
+                    title = "Weight",
+                    value = "${breed.weight.metric} kg"
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    modifier = Modifier.align(Alignment.End),
+                    onClick = onDismiss
+                ) {
+
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Color.White
+                        contentDescription = null
                     )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text("Close")
                 }
             }
         }

@@ -9,7 +9,7 @@ fun OnboardRoute(
     viewModel: OnboardViewModel = koinViewModel(),
     onNavigate: (OnboardEvent) -> Unit
 ) {
-    ScreenOnboard(viewModel = viewModel)
+    ScreenOnboard(onEvent = viewModel::onEvent)
 
     LaunchedEffect(Unit) {
         viewModel.navigation.collect { event ->

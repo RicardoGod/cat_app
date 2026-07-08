@@ -6,14 +6,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-class OnboardViewModel(useCase: OnboardUseCases) : ViewModel() {
+class OnboardViewModel : ViewModel() {
     private val _navigation =
         MutableSharedFlow<OnboardEvent>()
 
     val navigation =
         _navigation.asSharedFlow()
 
-    fun onEvent(event: OnboardEvent): Unit {
+    fun onEvent(event: OnboardEvent) {
         when (event) {
             is OnboardEvent.NavigateToBreeds ->
                 viewModelScope.launch {

@@ -7,9 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cat_app.ui.features.breeds.BreedsRoute
-import com.example.cat_app.ui.features.favourites.FavouritesRoute
+import com.example.cat_app.ui.features.onboard.OnboardEvent
 import com.example.cat_app.ui.features.onboard.OnboardRoute
-import com.example.cat_app.ui.features.onboard.ScreenOnboard
 import com.example.cat_app.ui.features.splash.SplashRoute
 
 
@@ -26,21 +25,26 @@ fun AppNavigation() {
 
         composable(Destination.Onboard.route) {
             OnboardRoute(
-                onNavigate = { navController.navigate("favorites") },
-            )
-
-            ScreenOnboard(
-                onNavigateToFavorites = { navController.navigate("favorites") },
-                onNavigateToBreeds = { navController.navigate("list") }
+                onNavigate = { event ->
+                    run {
+                        when (event) {
+                            OnboardEvent.NavigateToBreeds -> navController.navigate(Destination.Breeds.route)
+                            OnboardEvent.NavigateToFavorites -> navController.navigate(Destination.Favorites.route)
+                        }
+                    }
+                }
             )
         }
 
         composable(Destination.Breeds.route) {
-            BreedsRoute()
+            BreedsRoute(onNavigate = {
+                run {
+                    navController.popBackStack()
+                }
+            })
         }
 
-        composable(Destination.Favorites.route) {
-            FavouritesRoute()
-        }
+
     }
+
 }

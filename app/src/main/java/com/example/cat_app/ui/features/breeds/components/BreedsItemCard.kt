@@ -29,48 +29,48 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cat_app.R
-import com.example.cat_app.data.models.BreedsModel
+import com.example.cat_app.ui.features.breeds.model.BreedUi
 
 
 @Composable
 fun BreedItemCard(
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit,
-    onClick: () -> Unit,
-    breed: BreedsModel,
-    viewModel: BreedsViewModel_change
+    breed: BreedUi,
+    onCardClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
-    val imageUrl = viewModel.getBreedImageUrl(breed)
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 8.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .clickable(onClick = onCardClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             AsyncImage(
-                model = imageUrl,
+                model = breed.imageUrl.url,
                 contentDescription = "Image of ${breed.name}",
                 modifier = Modifier
                     .size(72.dp)
                     .clip(RoundedCornerShape(12.dp)),
-                placeholder = painterResource(id = R.drawable.placehold_error),
-                error = painterResource(id = R.drawable.ic_launcher_cat_foreground),
+                placeholder = painterResource(R.drawable.placehold_error),
+                error = painterResource(R.drawable.ic_launcher_cat_foreground),
                 contentScale = ContentScale.Crop
             )
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Column(
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
-                breed.name?.let {
+
+                breed.name.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.titleMedium,
@@ -78,15 +78,15 @@ fun BreedItemCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                breed.origin?.let {
+
+                breed.origin.let {
                     Text(
                         text = "Origin: $it",
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
-                breed.temperament?.let {
+
+                breed.temperament.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodySmall,
@@ -96,11 +96,20 @@ fun BreedItemCard(
                     )
                 }
             }
-            IconButton(onClick = onFavoriteClick) {
+
+            IconButton(
+                onClick = onFavoriteClick
+            ) {
                 Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remove from the favorites" else "add from the favorites",
-                    tint = if (isFavorite) Color.Red else Color.Gray
+                    imageVector = if (breed.isFavorite)
+                        Icons.Default.Favorite
+                    else
+                        Icons.Default.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (breed.isFavorite)
+                        Color.Red
+                    else
+                        Color.Gray
                 )
             }
         }

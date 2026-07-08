@@ -15,9 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.cat_app.ui.common.SquareButton
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ScreenOnboard(viewModel: OnboardViewModel) {
+fun ScreenOnboard(onEvent: (OnboardEvent) -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -42,10 +43,10 @@ fun ScreenOnboard(viewModel: OnboardViewModel) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     SquareButton("All Cats \uD83D\uDC3E", {
-                        viewModel.onEvent(OnboardEvent.NavigateToBreeds)
+                        onEvent(OnboardEvent.NavigateToBreeds)
                     })
                     SquareButton("Favorites 💜", {
-                        viewModel.onEvent(OnboardEvent.NavigateToFavorites)
+                        onEvent(OnboardEvent.NavigateToFavorites)
                     })
                 }
                 Spacer(modifier = Modifier.height(16.dp))

@@ -11,7 +11,7 @@ import org.koin.core.component.inject
 class FavouritesService : IFavouritesService, KoinComponent {
     val catsApi: CatsApiService by inject()
 
-    override suspend fun getFavorites(): Result<List<FavouriteModel>> {
+    override suspend fun getFavourites(): Result<List<FavouriteModel>> {
         try {
             val catsApiResponse = catsApi . getFavorites ().body()
             val response = catsApiResponse?.map(FavouriteDto::toFavouriteModel)

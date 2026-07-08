@@ -1,9 +1,10 @@
 package com.example.cat_app.ui.features.breeds
 
-import com.example.cat_app.data.models.BreedsModel
+import com.example.cat_app.ui.features.breeds.model.BreedUi
 
 data class BreedsUiState(
-    val data: List<BreedsModel> = emptyList(),
+    var breeds: List<BreedUi> = emptyList(),
+    var selectedBreed: BreedUi? = null,
     var search: String = String(),
     val isLoading: Boolean = false,
     val error: String? = null,
