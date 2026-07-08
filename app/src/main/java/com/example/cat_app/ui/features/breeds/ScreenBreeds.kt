@@ -98,20 +98,19 @@ fun ScreenBreeds(
                 }
             } else {
                 //list of found it
-                LazyColumn {
-                    items(state.breeds) { breed ->
-                        BreedList(
-                            breeds = state.breeds,
-                            onBreedClick = { breed ->
-                                onEvent(BreedsEvent.BreedClicked(breed))
-                            },
-                            onFavoriteClick = { breed ->
-                                onEvent(BreedsEvent.ToggleFavorite(breed))
 
-                            }
-                        )
+                BreedList(
+                    breeds = state.breeds,
+                    onBreedClick = { breed ->
+                        onEvent(BreedsEvent.BreedClicked(breed))
+                    },
+                    onFavoriteClick = { breed ->
+                        onEvent(BreedsEvent.ToggleFavorite(breed))
+
                     }
-                }
+                )
+
+
             }
         }
         //card with details about the cat
