@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.example.cat_app.data.api.catsModule
 import com.example.cat_app.data.services.servicesModule
 import com.example.cat_app.settings.network.connectionModule
+import com.example.cat_app.ui.components
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -23,7 +24,8 @@ class App : Application() {
                 listOf(
                     catsModule,
                     servicesModule,
-                    connectionModule
+                    connectionModule,
+                    components
                 )
             )
         }

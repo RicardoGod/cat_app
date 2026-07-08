@@ -25,14 +25,12 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ScreenSplash(
-    navController: NavController
+    onEvent: (SplashEvent) -> Unit,
 ) {
     // Splash screen display time: 2 seconds
     LaunchedEffect (Unit) {
         delay(2000L.milliseconds)
-        navController.navigate("onboard") {
-            popUpTo("splash") { inclusive = true }
-        }
+        onEvent(SplashEvent.Loading)
     }
 
     Box(

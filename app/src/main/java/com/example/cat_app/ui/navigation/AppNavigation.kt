@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cat_app.ui.features.breeds.BreedsRoute
 import com.example.cat_app.ui.features.onboard.OnboardEvent
 import com.example.cat_app.ui.features.onboard.OnboardRoute
+import com.example.cat_app.ui.features.splash.SplashEvent
 import com.example.cat_app.ui.features.splash.SplashRoute
 
 
@@ -20,7 +21,15 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = Destination.Splash.route) {
 
         composable(Destination.Splash.route) {
-            SplashRoute()
+            SplashRoute(onEvent = { event ->
+                run {
+                    when (event) {
+                        SplashEvent.Loading -> navController.navigate(Destination.Onboard.route) {
+                            popUpTo(Destination.Splash.route) { inclusive = true }
+                        }
+                    }
+                }
+            })
         }
 
         composable(Destination.Onboard.route) {
