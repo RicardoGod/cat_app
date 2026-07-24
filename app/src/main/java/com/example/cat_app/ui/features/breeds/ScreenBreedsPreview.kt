@@ -3,6 +3,7 @@ package com.example.cat_app.ui.features.breeds
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.cat_app.ui.features.breeds.model.BreedUi
+import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 
 @Preview
 @Composable

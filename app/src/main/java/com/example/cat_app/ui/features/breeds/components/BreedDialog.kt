@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.cat_app.R
+import com.example.cat_app.ui.common.TestTags
 import com.example.cat_app.ui.features.breeds.model.BreedUi
 
 @Composable
@@ -44,6 +46,7 @@ fun BreedDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag(TestTags.BREED_DIALOG)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             color = Color.White

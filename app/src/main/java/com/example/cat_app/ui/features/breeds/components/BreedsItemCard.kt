@@ -24,11 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cat_app.R
+import com.example.cat_app.ui.common.TestTags
 import com.example.cat_app.ui.features.breeds.model.BreedUi
 
 
@@ -42,6 +44,7 @@ fun BreedItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 8.dp)
+            .testTag(TestTags.BREED_CARD)
             .clickable(onClick = onCardClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -98,6 +101,7 @@ fun BreedItemCard(
             }
 
             IconButton(
+                modifier = Modifier.testTag(TestTags.FAVORITE_BUTTON),
                 onClick = onFavoriteClick
             ) {
                 Icon(

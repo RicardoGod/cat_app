@@ -1,11 +1,10 @@
 package com.example.cat_app.ui.features.breeds
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.data.models.BreedsModel
-import com.example.cat_app.data.services.IBreedsService
 import com.example.cat_app.ui.features.breeds.model.BreedUi
+import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,10 +25,7 @@ class BreedsViewModel : ViewModel() {
 
     private fun fetchBreeds() {
         viewModelScope.launch {
-            state.compareAndSet(
-                state.value,
-                BreedsUseCases().fetchBreeds(state.value)
-            )
+            state.value = BreedsUseCases().fetchBreeds(state.value)
         }
     }
 
@@ -53,25 +49,12 @@ class BreedsViewModel : ViewModel() {
 
     private fun selectBreed(breed: BreedUi) {
         state.update {
-
             it.copy(
                 selectedBreed = breed
             )
-
         }
     }
-
     private fun unselectBreed(){
         state.value.selectedBreed = null
-    }
-
-    fun getBreedImageUrl(breed: BreedsModel): String {
-        return breed.image?.url
-            ?: breed.referenceImageId?.let { "https://cdn2.thecatapi.com/images/$it.jpg" }
-            ?: "https://cdn2.thecatapi.com/images/default.jpg"
-    }
-
-    fun clearSearch() {
-        state.value.search = String()
     }
 }

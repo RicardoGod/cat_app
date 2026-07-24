@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.cat_app.ui.features.breeds.model.BreedUi
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.platform.testTag
+import com.example.cat_app.ui.common.TestTags
 
 @Composable
 fun BreedList(
@@ -16,7 +18,7 @@ fun BreedList(
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.testTag(TestTags.BREED_LIST),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(breeds) { breed ->

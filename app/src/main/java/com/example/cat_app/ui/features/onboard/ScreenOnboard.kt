@@ -13,8 +13,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.cat_app.ui.common.SquareButton
+import com.example.cat_app.ui.common.TestTags
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -42,12 +44,21 @@ fun ScreenOnboard(onEvent: (OnboardEvent) -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    SquareButton("All Cats \uD83D\uDC3E", {
-                        onEvent(OnboardEvent.NavigateToBreeds)
-                    })
-                    SquareButton("Favorites 💜", {
-                        onEvent(OnboardEvent.NavigateToFavorites)
-                    })
+                    SquareButton(
+                        text= "All Cats \uD83D\uDC3E",
+                        onClick = {
+                            onEvent(OnboardEvent.NavigateToBreeds)
+                        },
+                        modifier = Modifier.testTag(TestTags.BREEDS_NAV_BUTTON)
+
+                    )
+                    SquareButton(
+                        text ="Favorites 💜",
+                        onClick = {
+                            onEvent(OnboardEvent.NavigateToFavorites)
+                        },
+                        modifier = Modifier.testTag(TestTags.FAVORITES_NAV_BUTTON)
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }

@@ -6,6 +6,7 @@ import com.example.cat_app.data.models.FavouriteRequestModel
 import com.example.cat_app.data.services.IBreedsService
 import com.example.cat_app.data.services.IFavouritesService
 import com.example.cat_app.ui.features.breeds.model.BreedUi
+import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -49,7 +50,7 @@ class BreedsUseCases : KoinComponent{
         return state
     }
 
-    suspend fun toggleFavourite(state: BreedsUiState, id: String): BreedsUiState  {
+    suspend fun toggleFavourite(state: BreedsUiState, id: String): BreedsUiState {
         val request = FavouriteRequestModel(id)
         favouriteService.addFavourite(request)
 

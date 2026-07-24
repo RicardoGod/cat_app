@@ -1,6 +1,4 @@
-package com.example.cat_app.ui.features.breeds
-
-import com.example.cat_app.ui.features.breeds.model.BreedUi
+package com.example.cat_app.ui.features.breeds.model
 
 data class BreedsUiState(
     var breeds: List<BreedUi> = emptyList(),

@@ -16,13 +16,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SquareButton(text: String, onClick: () -> Unit) {
+fun SquareButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val buttonSize = screenWidth / 2.5f
 
     Button(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .size(buttonSize)
             .clip(RoundedCornerShape(8.dp)),
         colors = ButtonDefaults.buttonColors(
