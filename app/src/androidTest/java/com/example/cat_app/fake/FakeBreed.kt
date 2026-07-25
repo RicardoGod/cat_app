@@ -54,4 +54,23 @@ object BreedFakes {
         isFavorite = false,
         description = "Muscular cat with a wild appearance."
     )
+
+    fun breedWithFavoriteStatus(isFavorite: Boolean): BreedUi {
+        return BreedUi(
+            id = "1",
+            name = "Persian",
+            origin = "Iran",
+            temperament = "Affectionate",
+            lifeSpan = "12 - 15",
+            weight = BreedUi.BreedsWeightUi(
+                imperial = "kg",
+                metric = "4 - 7"
+            ),
+            imageUrl = BreedUi.BreedsImageUi(
+                url = ""
+            ),
+            isFavorite = isFavorite,
+            description = "A calm and affectionate breed."
+        )
+    }
 }

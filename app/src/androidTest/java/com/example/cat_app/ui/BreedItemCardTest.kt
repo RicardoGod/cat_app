@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.example.cat_app.fake.BreedFakes
+import com.example.cat_app.ui.common.TestTags
 import com.example.cat_app.ui.features.breeds.components.BreedItemCard
 import junit.framework.TestCase.assertTrue
 import org.junit.Rule
@@ -73,6 +74,38 @@ class BreedItemCardTest {
             .performClick()
 
         assertTrue(favoriteClicked)
+    }
+
+    @Test
+    fun favoriteFalse_showsBorderIcon() {
+
+        composeTestRule.setContent {
+            BreedItemCard(
+                breed = BreedFakes.breedWithFavoriteStatus(false),
+                onCardClick = {},
+                onFavoriteClick = {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(TestTags.FAVORITE_ICON_UNSELECTED, useUnmergedTree = true)
+            .assertExists()
+    }
+
+    @Test
+    fun favoriteTrue_showsFilledIcon() {
+
+        composeTestRule.setContent {
+            BreedItemCard(
+                breed = BreedFakes.breedWithFavoriteStatus(true),
+                onCardClick = {},
+                onFavoriteClick = {}
+            )
+        }
+
+        composeTestRule
+            .onNodeWithTag(TestTags.FAVORITE_ICON_SELECTED, useUnmergedTree = true)
+            .assertExists()
     }
 
 }

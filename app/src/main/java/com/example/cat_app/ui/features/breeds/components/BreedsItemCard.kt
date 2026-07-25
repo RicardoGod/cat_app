@@ -113,7 +113,13 @@ fun BreedItemCard(
                     tint = if (breed.isFavorite)
                         Color.Red
                     else
-                        Color.Gray
+                        Color.Gray,
+                    modifier = Modifier.testTag(
+                        if (breed.isFavorite)
+                            TestTags.FAVORITE_ICON_SELECTED
+                        else
+                            TestTags.FAVORITE_ICON_UNSELECTED
+                    )
                 )
             }
         }
