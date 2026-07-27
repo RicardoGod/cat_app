@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class BreedsViewModel : ViewModel() {
+class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
     val state = MutableStateFlow(BreedsUiState())
 
     fun onEvent(event: BreedsEvent){
@@ -25,7 +25,7 @@ class BreedsViewModel : ViewModel() {
 
     private fun fetchBreeds() {
         viewModelScope.launch {
-            state.value = BreedsUseCases().fetchBreeds(state.value)
+            state.value = useCases.fetchBreeds(state.value)
         }
     }
 
@@ -33,7 +33,7 @@ class BreedsViewModel : ViewModel() {
         viewModelScope.launch {
             state.compareAndSet(
                 state.value,
-                BreedsUseCases().searchBreeds(state = state.value, query = query)
+                useCases.searchBreeds(state = state.value, query = query)
             )
         }
     }
@@ -42,7 +42,7 @@ class BreedsViewModel : ViewModel() {
         viewModelScope.launch {
             state.compareAndSet(
                 state.value,
-                BreedsUseCases().toggleFavourite(state.value, breed.id)
+                useCases.toggleFavourite(state.value, breed.id)
             )
         }
     }

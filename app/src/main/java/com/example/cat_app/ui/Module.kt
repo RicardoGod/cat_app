@@ -5,6 +5,6 @@ import com.example.cat_app.ui.features.onboard.OnboardViewModel
 import org.koin.dsl.module
 
 val components = module {
-    single { BreedsViewModel() }
+    single { BreedsViewModel(get()) }
     single { OnboardViewModel() }
 }
