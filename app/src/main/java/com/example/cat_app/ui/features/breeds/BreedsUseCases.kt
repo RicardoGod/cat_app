@@ -24,30 +24,44 @@ class BreedsUseCases : KoinComponent{
 
         val favourites = favouriteService.getFavourites()
 
-        when {
-            breeds.isSuccess -> state.breeds = breeds.getOrThrow()
-                .map { breed -> BreedUi.fromBreedsModel(breed, isBreedFavourite(breed, favourites.getOrThrow())) }
+        return when {
+            breeds.isSuccess -> buildBreedUiStateFromCurrentState(breeds, favourites, state)
             else -> BreedsUiState(error = "Failed to load breeds")
         }
-        return state
     }
 
 
-    private fun isBreedFavourite(breed: BreedsModel, favourites: List<FavouriteModel>): Boolean {
-        return favourites.any { fav -> fav.imageId == breed.image?.id }
+    private fun isBreedFavourite(breed: BreedsModel, favourites: List<FavouriteModel>?): Boolean {
+        return favourites?.any { fav -> fav.imageId == breed.image?.id } ?: false
     }
 
     suspend fun searchBreeds(state: BreedsUiState, query: String): BreedsUiState {
         val breeds = breedsService.searchBreeds(query)
         val favourites = favouriteService.getFavourites()
 
-        when {
-            breeds.isSuccess -> state.breeds = breeds.getOrThrow()
-                .map { breed -> BreedUi.fromBreedsModel(breed, isBreedFavourite(breed, favourites.getOrThrow())) }
-
+        return when {
+            breeds.isSuccess -> buildBreedUiStateFromCurrentState(breeds, favourites, state)
             else -> BreedsUiState(error = "Failed to load breeds")
         }
-        return state
+
+    }
+
+    private fun buildBreedUiStateFromCurrentState(
+        breeds: Result<List<BreedsModel>>,
+        favourites: Result<List<FavouriteModel>>,
+        state: BreedsUiState
+    ): BreedsUiState {
+        val breedUiList = breeds.getOrThrow()
+            .map {
+                BreedUi.fromBreedsModel(
+                    it,
+                    isBreedFavourite(it, favourites.getOrNull())
+                )
+            }
+
+        return state.copy(
+            breeds = breedUiList
+        )
     }
 
     suspend fun toggleFavourite(state: BreedsUiState, id: String): BreedsUiState {

@@ -2,7 +2,7 @@ package com.example.cat_app.helper
 
 import com.example.cat_app.ui.features.breeds.model.BreedUi
 
-object FakeBreeds {
+object FakeBreedsUi {
 
     val persian = BreedUi(
         id = "1",
