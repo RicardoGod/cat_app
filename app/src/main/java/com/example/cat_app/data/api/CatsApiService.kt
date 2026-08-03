@@ -13,7 +13,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CatsApiService: KoinComponent{
-
+    @GET("v1/breeds")
     suspend fun getCatsList(
         @Query("limit") limit: Int,
         @Query("page") page: Int

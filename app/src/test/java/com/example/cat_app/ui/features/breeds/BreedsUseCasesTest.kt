@@ -45,6 +45,7 @@ class BreedsUseCasesKoinTest {
                 module {
                     single { breedService}
                     single { favoriteService}
+
                 }
             )
         }

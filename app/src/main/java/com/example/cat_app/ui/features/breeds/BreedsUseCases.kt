@@ -1,5 +1,6 @@
 package com.example.cat_app.ui.features.breeds
 
+import android.util.Log
 import com.example.cat_app.data.models.BreedsModel
 import com.example.cat_app.data.models.FavouriteModel
 import com.example.cat_app.data.models.FavouriteRequestModel
@@ -17,10 +18,12 @@ class BreedsUseCases : KoinComponent{
     val favouriteService: IFavouritesService by inject()
 
     suspend fun fetchBreeds(state: BreedsUiState): BreedsUiState {
+        Log.d("BreedsUseCases", "Iniciando fetchBreeds, state=$state")
         val breeds = breedsService.getBreedsList(
             limit = state.pageSize,
             page = state.currentPage
         )
+        Log.d("BreedsUseCases", "Sucesso ao carregar breeds, count=${breeds.isSuccess}")
 
         val favourites = favouriteService.getFavourites()
 

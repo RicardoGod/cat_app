@@ -1,5 +1,6 @@
 package com.example.cat_app.ui.features.breeds
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.data.models.BreedsModel
@@ -25,6 +26,11 @@ class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
 
     private fun fetchBreeds() {
         viewModelScope.launch {
+
+            Log.d("BreedsViewModel", "fetchBreeds() chamada. Estado atual: ${state.value}")
+            val newState = useCases.fetchBreeds(state.value)
+
+            Log.d("BreedsViewModel", "fetchBreeds() terminou. Novo estado: $newState")
             state.value = useCases.fetchBreeds(state.value)
         }
     }
