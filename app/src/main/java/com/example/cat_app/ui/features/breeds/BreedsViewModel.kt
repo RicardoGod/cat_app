@@ -18,7 +18,12 @@ class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
             is BreedsEvent.LoadingScreen -> fetchBreeds()
             is BreedsEvent.BreedClicked -> selectBreed(event.breed)
             is BreedsEvent.CloseDialog -> unselectBreed()
-            is BreedsEvent.SearchChanged -> searchBreeds(event.text)
+            is BreedsEvent.SearchChanged -> {
+                state.value = state.value.copy(search = event.value)
+                searchBreeds(event.value)
+            }
+//                searchBreeds(event.text)
+            is BreedsEvent.ClearSearch -> clearSearch()
             is BreedsEvent.ToggleFavorite -> toggleFavourite(event.breed)
             else -> {}
         }
@@ -37,13 +42,28 @@ class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
 
     private fun searchBreeds(query: String) {
         viewModelScope.launch {
-            state.compareAndSet(
-                state.value,
-                useCases.searchBreeds(state = state.value, query = query)
+
+            val newState = useCases.searchBreeds(
+                state = state.value.copy(search = query),
+                query = query
+            )
+            state.value = newState
+//            state.compareAndSet(
+//                state.value,
+//                useCases.searchBreeds(state = state.value, query = query)
+//            )
+        }
+
+    }
+    private fun clearSearch() {
+        viewModelScope.launch {
+            state.value = state.value.copy(
+                search = "",
+                breeds = state.value.breeds,
+                error = null
             )
         }
     }
-
     private fun toggleFavourite(breed: BreedUi) {
         viewModelScope.launch {
             state.compareAndSet(

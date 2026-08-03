@@ -4,7 +4,7 @@ import com.example.cat_app.ui.features.breeds.model.BreedUi
 
 sealed interface BreedsEvent {
 
-    data class SearchChanged(val text: String) : BreedsEvent
+    data class SearchChanged(val value: String) : BreedsEvent
 
     data object ClearSearch : BreedsEvent
 
