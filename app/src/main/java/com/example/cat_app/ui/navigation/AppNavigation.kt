@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cat_app.data.api.dto.favourite.FavoriteRoute
 import com.example.cat_app.ui.features.breeds.BreedsRoute
 import com.example.cat_app.ui.features.onboard.OnboardEvent
 import com.example.cat_app.ui.features.onboard.OnboardRoute
@@ -57,6 +58,15 @@ fun AppNavigation(
                 }
             })
         }
+
+        composable(Destination.Favorites.route) {
+            FavoriteRoute(onNavigate = {
+                run {
+                    navController.popBackStack()
+                }
+            })
+        }
+
 
 
     }

@@ -1,5 +1,6 @@
 package com.example.cat_app.ui
 
+import com.example.cat_app.data.api.dto.favourite.FavoriteViewModel
 import com.example.cat_app.data.services.BreedsService
 import com.example.cat_app.data.services.FavouritesService
 import com.example.cat_app.data.services.IBreedsService
@@ -11,6 +12,7 @@ import org.koin.dsl.module
 
 val components = module {
     single { BreedsViewModel(get()) }
+    single { FavoriteViewModel(get()) }
     single { OnboardViewModel() }
 
 

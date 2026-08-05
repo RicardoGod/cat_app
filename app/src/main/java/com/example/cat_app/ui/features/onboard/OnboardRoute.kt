@@ -2,6 +2,7 @@ package com.example.cat_app.ui.features.onboard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.example.cat_app.data.api.dto.favourite.ScreenFavorite
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
