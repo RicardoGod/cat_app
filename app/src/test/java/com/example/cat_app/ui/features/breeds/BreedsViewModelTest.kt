@@ -21,6 +21,20 @@ class BreedsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
     val useCase: BreedsUseCases = mock()
+    @Test
+    fun loadingScreen_callsUseCase() = runTest {
+
+        whenever(useCase.fetchBreeds(any()))
+            .thenReturn(BreedsUiState())
+
+        val vm = BreedsViewModel(useCase)
+
+        vm.onEvent(BreedsEvent.LoadingScreen)
+
+        advanceUntilIdle()
+
+        verify(useCase).fetchBreeds(any())
+    }
 
     @Test
     fun loadBreeds_success_updatesState() = runTest {
@@ -28,7 +42,8 @@ class BreedsViewModelTest {
         val state = fakeBreedsUiState(fakeBreed)
 
         // Given
-        whenever(useCase.fetchBreeds(BreedsUiState())).thenReturn(state)
+        whenever(useCase.fetchBreeds(any()))
+            .thenReturn(state)
 
         // When
         val vm = BreedsViewModel(useCase)
@@ -153,20 +168,6 @@ class BreedsViewModelTest {
         )
     }
 
-    @Test
-    fun loadingScreen_callsUseCase() = runTest {
-
-        whenever(useCase.fetchBreeds(any()))
-            .thenReturn(BreedsUiState())
-
-        val vm = BreedsViewModel(useCase)
-
-        vm.onEvent(BreedsEvent.LoadingScreen)
-
-        advanceUntilIdle()
-
-        verify(useCase).fetchBreeds(any())
-    }
 
     @Test
     fun searchChanged_passesCorrectQuery() = runTest {

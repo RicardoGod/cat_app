@@ -24,7 +24,7 @@ data class CatDto(
     val weight: CatWeightDto? = null,
 ){
 
-    fun toBreedsModel(): BreedsModel {
+    public fun toBreedsModel(): BreedsModel {
         return BreedsModel(
             id = id,
             name = name,

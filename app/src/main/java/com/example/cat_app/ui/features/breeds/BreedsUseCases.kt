@@ -66,12 +66,16 @@ class BreedsUseCases : KoinComponent{
 
     suspend fun toggleFavourite(state: BreedsUiState, id: String): BreedsUiState {
         val request = FavouriteRequestModel(id)
-        favouriteService.addFavourite(request)
+        val result = favouriteService.addFavourite(request)
 
-        state.breeds
-            .find { breedUi -> breedUi.id == id }
-            ?.let { breedUi -> breedUi.isFavorite = true }
-
-        return state
+        when{
+            result.isSuccess -> { state.breeds
+                .find { breedUi -> breedUi.id == id }
+                ?.let { breedUi -> breedUi.isFavorite = true }
+                return state
+            }
+            else ->
+                return state
+        }
     }
 }
