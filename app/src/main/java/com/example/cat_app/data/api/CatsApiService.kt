@@ -13,6 +13,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CatsApiService: KoinComponent{
+
     @GET("v1/breeds")
     suspend fun getCatsList(
         @Query("limit") limit: Int,
@@ -32,7 +33,7 @@ interface CatsApiService: KoinComponent{
     // DELETE - Remove favorites
     @DELETE("v1/favourites/{favourite_id}")
     suspend fun removeFavourite(
-        @Path("favourite_id") favouriteId: Int
+        @Path("favourite_id") favouriteId: String
     ): Response<Unit>
 
     // GET - breed search

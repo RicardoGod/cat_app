@@ -31,6 +31,7 @@ class BreedsScreenTest {
         composeTestRule.setContent {
 
             ScreenBreeds(
+                search = "",
                 state = BreedsUiState(
                     isLoading = true
                 ),
@@ -51,6 +52,7 @@ class BreedsScreenTest {
         composeTestRule.setContent {
 
             ScreenBreeds(
+                search = "",
                 state = BreedsUiState(
                     breeds = emptyList()
                 ),
@@ -68,6 +70,7 @@ class BreedsScreenTest {
         composeTestRule.setContent {
 
             ScreenBreeds(
+                search = "",
                 state = BreedsUiState(
                     breeds = listOf(
                         BreedFakes.persian,
@@ -94,6 +97,7 @@ class BreedsScreenTest {
         composeTestRule.setContent {
 
             ScreenBreeds(
+                search = "",
 
                 state = BreedsUiState(),
 
@@ -122,6 +126,7 @@ class BreedsScreenTest {
         composeTestRule.setContent {
 
             ScreenBreeds(
+                search = "",
                 state = BreedsUiState(
                     breeds = listOf(BreedFakes.persian),
                     selectedBreed = BreedFakes.persian
@@ -151,6 +156,7 @@ class BreedsScreenTest {
 
         composeTestRule.setContent {
             ScreenBreeds(
+                search = "",
                 state = state,
                 onEvent = {},
                 navigateBack = {}
