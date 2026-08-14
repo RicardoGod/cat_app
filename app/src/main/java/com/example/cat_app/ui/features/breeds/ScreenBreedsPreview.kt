@@ -9,6 +9,7 @@ import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 @Composable
 fun ScreenBreedsPreview() {
     ScreenBreeds(
+        search = "",
         state = BreedsUiState(
             getBreeds(),
             null,

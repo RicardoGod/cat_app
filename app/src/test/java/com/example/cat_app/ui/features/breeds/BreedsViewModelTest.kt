@@ -6,21 +6,30 @@ import com.example.cat_app.ui.features.breeds.model.BreedUi
 import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert
+import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BreedsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
     val useCase: BreedsUseCases = mock()
+
     @Test
     fun loadingScreen_callsUseCase() = runTest {
 
@@ -84,21 +93,6 @@ class BreedsViewModelTest {
     }
 
     @Test
-    fun breedClicked_updatesSelectedBreed() {
-
-        val vm = BreedsViewModel(useCase)
-
-        vm.onEvent(
-            BreedsEvent.BreedClicked(FakeBreedsUi.persian)
-        )
-
-        assertEquals(
-            FakeBreedsUi.persian,
-            vm.state.value.selectedBreed
-        )
-    }
-
-    @Test
     fun closeDialog_unselectsBreed() {
 
         val vm = BreedsViewModel(useCase)
@@ -140,6 +134,24 @@ class BreedsViewModelTest {
         )
     }
 
+    @Test
+    fun toggleFavourite_callsUseCase() = runTest {
+
+        whenever(
+            useCase.toggleFavourite(any(), any())
+        ).thenReturn(BreedsUiState())
+
+        val vm = BreedsViewModel(useCase)
+
+        vm.onEvent(
+            BreedsEvent.ToggleFavorite(FakeBreedsUi.persian)
+        )
+
+        advanceUntilIdle()
+
+        verify(useCase)
+            .toggleFavourite(any(), eq(FakeBreedsUi.persian.id))
+    }
 
     @Test
     fun toggleFavourite_updatesBreed() = runTest {
@@ -162,9 +174,14 @@ class BreedsViewModelTest {
 
         advanceUntilIdle()
 
+        verify(useCase).toggleFavourite(
+            any(),
+            eq(favourite.id)
+        )
+
         assertEquals(
             true,
-            vm.state.value.breeds.first().isFavorite
+            vm.state.value.breeds.find { it.id == favourite.id } ?.isFavorite
         )
     }
 
@@ -188,25 +205,239 @@ class BreedsViewModelTest {
     }
 
     @Test
-    fun toggleFavourite_callsUseCase() = runTest {
-
-        whenever(
-            useCase.toggleFavourite(any(), any())
-        ).thenReturn(BreedsUiState())
+    fun searchChanged_updatesSearchQuery() = runTest {
 
         val vm = BreedsViewModel(useCase)
 
         vm.onEvent(
-            BreedsEvent.ToggleFavorite(FakeBreedsUi.persian)
+            BreedsEvent.SearchChanged("Aby")
         )
+
+        assertEquals(
+            "Aby",
+            vm.searchQuery.value
+        )
+    }
+
+    @Test
+    fun searchChanged_searchesAfterDebounce() = runTest {
+
+        val vm = BreedsViewModel(useCase)
+
+        val expectedState = fakeBreedsUiState(
+            FakeBreedsUi.persian
+        )
+
+        whenever(
+            useCase.searchBreeds(
+                any(),
+                eq("Persian")
+            )
+        ).thenReturn(expectedState)
+
+        vm.onEvent(
+            BreedsEvent.SearchChanged("Persian")
+        )
+
+        // Here it should not be called
+        verify(useCase, never()).searchBreeds(
+            any(),
+            eq("Persian")
+        )
+
+        advanceTimeBy(300.milliseconds)
 
         advanceUntilIdle()
 
-        verify(useCase)
-            .toggleFavourite(any(), eq(FakeBreedsUi.persian.id))
+        verify(useCase).searchBreeds(
+            any(),
+            eq("Persian")
+        )
+
+        assertEquals(
+            expectedState,
+            vm.state.value
+        )
     }
 
+    @Test
+    fun searchChangedMultipleTimes_debounceRapidInput() = runTest {
 
+        val vm = BreedsViewModel(useCase)
+
+        whenever(
+            useCase.searchBreeds(
+                any(),
+                eq("Aby")
+            )
+        ).thenReturn(
+            fakeBreedsUiState(FakeBreedsUi.persian)
+        )
+
+        vm.onEvent(BreedsEvent.SearchChanged("A"))
+        vm.onEvent(BreedsEvent.SearchChanged("Ab"))
+        vm.onEvent(BreedsEvent.SearchChanged("Aby"))
+
+        advanceTimeBy(300.milliseconds)
+        advanceUntilIdle()
+
+        verify(useCase, never()).searchBreeds(
+            any(),
+            eq("A")
+        )
+
+        verify(useCase, never()).searchBreeds(
+            any(),
+            eq("Ab")
+        )
+
+        verify(useCase).searchBreeds(
+            any(),
+            eq("Aby")
+        )
+    }
+
+    @Test
+    fun clearSearch_fetchesBreedsAgain() = runTest {
+
+        val vm = BreedsViewModel(useCase)
+
+        val searchState = fakeBreedsUiState(
+            FakeBreedsUi.persian
+        )
+
+        whenever(
+            useCase.searchBreeds(
+                any(),
+                eq("Aby")
+            )
+        ).thenReturn(searchState)
+
+        whenever(
+            useCase.fetchBreeds(any())
+        ).thenReturn(
+            fakeBreedsUiState(FakeBreedsUi.persian)
+        )
+
+        vm.onEvent(
+            BreedsEvent.SearchChanged("Aby")
+        )
+
+        advanceTimeBy(300.milliseconds)
+        advanceUntilIdle()
+
+        assertEquals(
+            "Aby",
+            vm.searchQuery.value
+        )
+
+        vm.onEvent(
+            BreedsEvent.ClearSearch
+        )
+
+        assertEquals(
+            "",
+            vm.searchQuery.value
+        )
+
+        advanceTimeBy(300.milliseconds)
+        advanceUntilIdle()
+
+        verify(useCase).fetchBreeds(any())
+    }
+
+    @Test
+    fun searchChanged_toEmpty_fetchesBreeds() = runTest {
+
+        val vm = BreedsViewModel(useCase)
+
+        whenever(
+            useCase.fetchBreeds(any())
+        ).thenReturn(
+            fakeBreedsUiState(FakeBreedsUi.persian)
+        )
+
+        vm.onEvent(
+            BreedsEvent.SearchChanged("Aby")
+        )
+
+        advanceTimeBy(300.milliseconds)
+
+        vm.onEvent(
+            BreedsEvent.SearchChanged("")
+        )
+
+        advanceTimeBy(300.milliseconds)
+        advanceUntilIdle()
+
+        verify(useCase).fetchBreeds(any())
+    }
+
+    @Test
+    fun searchChanged_sameQuery_doesNotSearchTwice() = runTest {
+
+        val vm = BreedsViewModel(useCase)
+
+        whenever(
+            useCase.searchBreeds(
+                any(),
+                eq("Aby")
+            )
+        ).thenReturn(
+            fakeBreedsUiState(FakeBreedsUi.persian)
+        )
+
+        vm.onEvent(BreedsEvent.SearchChanged("Aby"))
+
+        advanceTimeBy(300)
+        advanceUntilIdle()
+
+        vm.onEvent(BreedsEvent.SearchChanged("Aby"))
+
+        advanceTimeBy(300.milliseconds)
+        advanceUntilIdle()
+
+        verify(
+            useCase,
+            times(1)
+        ).searchBreeds(
+            any(),
+            eq("Aby")
+        )
+    }
+
+    @Test
+    fun breedClicked_updatesSelectedBreed() = runTest {
+
+        val breed = FakeBreedsUi.persian
+
+        val vm = BreedsViewModel(useCase)
+
+        vm.onEvent(
+            BreedsEvent.BreedClicked(breed)
+        )
+
+        assertEquals(
+            breed,
+            vm.state.value.selectedBreed
+        )
+    }
+
+    @Test
+    fun closeDialog_clearsSelectedBreed() = runTest {
+
+        val breed = FakeBreedsUi.persian
+
+        val vm = BreedsViewModel(useCase)
+
+        vm.onEvent(BreedsEvent.BreedClicked(breed))
+        vm.onEvent(BreedsEvent.CloseDialog)
+
+        assertEquals(
+            null,
+            vm.state.value.selectedBreed
+        )
+    }
 
     fun fakeBreedsUiState(breedUi: BreedUi) = BreedsUiState(
             breeds = listOf(breedUi),

@@ -21,6 +21,7 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.refEq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -205,14 +206,14 @@ class BreedsUseCasesKoinTest {
     }
 
     @Test
-    fun toggleFavourite_marksBreedAsFavourite() = runTest {
+    fun toggleFavourite_addsFavourite_whenBreedIsNotFavourite() = runTest {
 
         val breed = FakeBreedsUi.persian.copy(
             isFavorite = false
         )
 
         val state = BreedsUiState(
-            breeds = mutableListOf(breed)
+            breeds = listOf(breed)
         )
 
         whenever(
@@ -225,6 +226,87 @@ class BreedsUseCasesKoinTest {
         )
 
         assertTrue(result.breeds.first().isFavorite)
+    }
+
+    @Test
+    fun toggleFavourite_removesFavourite_whenBreedIsFavourite() = runTest {
+
+        val breed = FakeBreedsUi.persian.copy(
+            isFavorite = true
+        )
+
+        val state = BreedsUiState(
+            breeds = listOf(breed)
+        )
+
+        whenever(
+            favoriteService.removeFavourite(breed.id)
+        ).thenReturn(
+            Result.success(Unit)
+        )
+
+        val result = BreedsUseCases().toggleFavourite(
+            state,
+            breed.id
+        )
+
+        assertFalse(
+            result.breeds.first().isFavorite
+        )
+
+        verify(favoriteService).removeFavourite(breed.id)
+    }
+
+    @Test
+    fun toggleFavourite_doesNotAdd_whenBreedIsFavourite() = runTest {
+
+        val breed = FakeBreedsUi.persian.copy(
+            isFavorite = true
+        )
+
+        whenever(
+            favoriteService.removeFavourite(breed.id)
+        ).thenReturn(
+            Result.success(Unit)
+        )
+
+        BreedsUseCases().toggleFavourite(
+            BreedsUiState(
+                breeds = listOf(breed)
+            ),
+            breed.id
+        )
+
+        verify(favoriteService).removeFavourite(breed.id)
+        verify(favoriteService, org.mockito.kotlin.never())
+            .addFavourite(any())
+    }
+
+    @Test
+    fun toggleFavourite_keepsFavourite_whenRemoveFails() = runTest {
+
+        val breed = FakeBreedsUi.persian.copy(
+            isFavorite = true
+        )
+
+        val state = BreedsUiState(
+            breeds = listOf(breed)
+        )
+
+        whenever(
+            favoriteService.removeFavourite(breed.id)
+        ).thenReturn(
+            Result.failure(Exception())
+        )
+
+        val result = BreedsUseCases().toggleFavourite(
+            state,
+            breed.id
+        )
+
+        assertTrue(
+            result.breeds.first().isFavorite
+        )
     }
 
     @Test
@@ -284,8 +366,7 @@ class BreedsUseCasesKoinTest {
     }
 
     @Test
-    fun toggleFavourite_returnsSameStateInstance() = runTest {
-
+    fun toggleFavourite_returnsSameStateInstance_whenServiceFails() = runTest {
         val breed = BreedUi.fromBreedsModel(
             FakeBreedsModel.persian,
             false
@@ -293,7 +374,7 @@ class BreedsUseCasesKoinTest {
 
         whenever(
             favoriteService.addFavourite(any())
-        ).thenReturn(Result.success(null))
+        ).thenReturn(Result.failure(Exception()))
 
         val state = BreedsUiState(
             breeds = listOf(breed)
@@ -310,23 +391,78 @@ class BreedsUseCasesKoinTest {
     @Test
     fun toggleFavourite_unknownBreed_doesNothing() = runTest {
 
+        val breed = FakeBreedsUi.persian.copy(
+            isFavorite = false
+        )
+
+        val state = BreedsUiState(
+            breeds = listOf(breed)
+        )
+
+        val result = BreedsUseCases().toggleFavourite(
+            state,
+            "unknown-id"
+        )
+
+        assertEquals(state, result)
+
+        verify(favoriteService, never())
+            .addFavourite(any())
+
+        verify(favoriteService, never())
+            .removeFavourite(any())
+    }
+
+    @Test
+    fun addFavourite_returnsTrue_whenServiceSucceeds() = runTest {
+
         whenever(
             favoriteService.addFavourite(any())
         ).thenReturn(Result.success(null))
 
-        val breed = BreedUi.fromBreedsModel(
-            FakeBreedsModel.persian,
-            false
-        )
+        val result = BreedsUseCases()
+            .addFavourite(FakeBreedsUi.persian.id)
 
-        val result = BreedsUseCases().toggleFavourite(
-            BreedsUiState(
-                breeds = listOf(breed)
-            ),
-            "unknown-id"
-        )
+        assertTrue(result)
+    }
 
-        assertFalse(result.breeds.first().isFavorite)
+    @Test
+    fun addFavourite_returnsFalse_whenServiceFails() = runTest {
+
+        whenever(
+            favoriteService.addFavourite(any())
+        ).thenReturn(Result.failure(Exception()))
+
+        val result = BreedsUseCases()
+            .addFavourite(FakeBreedsUi.persian.id)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun removeFavourite_returnsFalse_whenServiceSucceeds() = runTest {
+
+        whenever(
+            favoriteService.removeFavourite(FakeBreedsUi.persian.id)
+        ).thenReturn(Result.success(Unit))
+
+        val result = BreedsUseCases()
+            .removeFavourite(FakeBreedsUi.persian.id)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun removeFavourite_returnsTrue_whenServiceFails() = runTest {
+
+        whenever(
+            favoriteService.removeFavourite(FakeBreedsUi.persian.id)
+        ).thenReturn(Result.failure(Exception()))
+
+        val result = BreedsUseCases()
+            .removeFavourite(FakeBreedsUi.persian.id)
+
+        assertTrue(result)
     }
 
     @Test

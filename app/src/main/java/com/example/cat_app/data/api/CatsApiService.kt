@@ -33,7 +33,7 @@ interface CatsApiService: KoinComponent{
     // DELETE - Remove favorites
     @DELETE("v1/favourites/{favourite_id}")
     suspend fun removeFavourite(
-        @Path("favourite_id") favouriteId: Int
+        @Path("favourite_id") favouriteId: String
     ): Response<Unit>
 
     // GET - breed search
