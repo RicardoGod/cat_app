@@ -3,16 +3,11 @@ package com.example.cat_app.ui.features.breeds
 import com.example.cat_app.helper.FakeBreedsUi
 import com.example.cat_app.helper.MainDispatcherRule
 import com.example.cat_app.ui.features.breeds.model.BreedUi
-import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
-import org.junit.Assert.assertNotNull
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -33,8 +28,8 @@ class BreedsViewModelTest {
     @Test
     fun loadingScreen_callsUseCase() = runTest {
 
-        whenever(useCase.fetchBreeds(any()))
-            .thenReturn(BreedsUiState())
+        whenever(useCase.fetchBreeds(any(), any()))
+            .thenReturn(listOf())
 
         val vm = BreedsViewModel(useCase)
 
@@ -42,17 +37,16 @@ class BreedsViewModelTest {
 
         advanceUntilIdle()
 
-        verify(useCase).fetchBreeds(any())
+        verify(useCase).fetchBreeds(any(), any())
     }
 
     @Test
     fun loadBreeds_success_updatesState() = runTest {
         val fakeBreed = FakeBreedsUi.persian
-        val state = fakeBreedsUiState(fakeBreed)
 
         // Given
-        whenever(useCase.fetchBreeds(any()))
-            .thenReturn(state)
+        whenever(useCase.fetchBreeds(any(), any()))
+            .thenReturn(listOf(fakeBreed))
 
         // When
         val vm = BreedsViewModel(useCase)
@@ -78,9 +72,9 @@ class BreedsViewModelTest {
     fun loadingScreen_loadsBreeds() = runTest {
 
         val breed = FakeBreedsUi.persian
-        val state = fakeBreedsUiState(breed)
 
-        whenever(useCase.fetchBreeds(any())).thenReturn(state)
+        whenever(useCase.fetchBreeds(any(), any()))
+            .thenReturn(listOf(breed))
 
         val vm = BreedsViewModel(useCase)
 
@@ -115,9 +109,9 @@ class BreedsViewModelTest {
         val breed = FakeBreedsUi.persian
 
         whenever(
-            useCase.searchBreeds(any(), eq("pers"))
+            useCase.searchBreeds("pers")
         ).thenReturn(
-            fakeBreedsUiState(breed)
+            listOf(breed)
         )
 
         val vm = BreedsViewModel(useCase)
@@ -139,7 +133,7 @@ class BreedsViewModelTest {
 
         whenever(
             useCase.toggleFavourite(any(), any())
-        ).thenReturn(BreedsUiState())
+        ).thenReturn(listOf())
 
         val vm = BreedsViewModel(useCase)
 
@@ -163,8 +157,9 @@ class BreedsViewModelTest {
         whenever(
             useCase.toggleFavourite(any(), eq(favourite.id))
         ).thenReturn(
-            fakeBreedsUiState(favourite)
+            listOf(favourite)
         )
+
 
         val vm = BreedsViewModel(useCase)
 
@@ -190,8 +185,8 @@ class BreedsViewModelTest {
     fun searchChanged_passesCorrectQuery() = runTest {
 
         whenever(
-            useCase.searchBreeds(any(), any())
-        ).thenReturn(BreedsUiState())
+            useCase.searchBreeds(any())
+        ).thenReturn(listOf())
 
         val vm = BreedsViewModel(useCase)
 
@@ -201,7 +196,7 @@ class BreedsViewModelTest {
 
         advanceUntilIdle()
 
-        verify(useCase).searchBreeds(any(), eq("siam"))
+        verify(useCase).searchBreeds("siam")
     }
 
     @Test
@@ -224,15 +219,12 @@ class BreedsViewModelTest {
 
         val vm = BreedsViewModel(useCase)
 
-        val expectedState = fakeBreedsUiState(
+        val expectedState = listOf(
             FakeBreedsUi.persian
         )
 
         whenever(
-            useCase.searchBreeds(
-                any(),
-                eq("Persian")
-            )
+            useCase.searchBreeds("Persian")
         ).thenReturn(expectedState)
 
         vm.onEvent(
@@ -240,23 +232,17 @@ class BreedsViewModelTest {
         )
 
         // Here it should not be called
-        verify(useCase, never()).searchBreeds(
-            any(),
-            eq("Persian")
-        )
+        verify(useCase, never()).searchBreeds("Persian")
 
         advanceTimeBy(300.milliseconds)
 
         advanceUntilIdle()
 
-        verify(useCase).searchBreeds(
-            any(),
-            eq("Persian")
-        )
+        verify(useCase).searchBreeds("Persian")
 
         assertEquals(
             expectedState,
-            vm.state.value
+            vm.state.value.breeds
         )
     }
 
@@ -266,12 +252,9 @@ class BreedsViewModelTest {
         val vm = BreedsViewModel(useCase)
 
         whenever(
-            useCase.searchBreeds(
-                any(),
-                eq("Aby")
-            )
+            useCase.searchBreeds("Aby")
         ).thenReturn(
-            fakeBreedsUiState(FakeBreedsUi.persian)
+            listOf(FakeBreedsUi.persian)
         )
 
         vm.onEvent(BreedsEvent.SearchChanged("A"))
@@ -281,20 +264,11 @@ class BreedsViewModelTest {
         advanceTimeBy(300.milliseconds)
         advanceUntilIdle()
 
-        verify(useCase, never()).searchBreeds(
-            any(),
-            eq("A")
-        )
+        verify(useCase, never()).searchBreeds("A")
 
-        verify(useCase, never()).searchBreeds(
-            any(),
-            eq("Ab")
-        )
+        verify(useCase, never()).searchBreeds("Ab")
 
-        verify(useCase).searchBreeds(
-            any(),
-            eq("Aby")
-        )
+        verify(useCase).searchBreeds("Aby")
     }
 
     @Test
@@ -302,21 +276,18 @@ class BreedsViewModelTest {
 
         val vm = BreedsViewModel(useCase)
 
-        val searchState = fakeBreedsUiState(
+        val expectedSearch = listOf(
             FakeBreedsUi.persian
         )
 
         whenever(
-            useCase.searchBreeds(
-                any(),
-                eq("Aby")
-            )
-        ).thenReturn(searchState)
+            useCase.searchBreeds("Aby")
+        ).thenReturn(expectedSearch)
 
         whenever(
-            useCase.fetchBreeds(any())
+            useCase.fetchBreeds(any(), any())
         ).thenReturn(
-            fakeBreedsUiState(FakeBreedsUi.persian)
+            expectedSearch
         )
 
         vm.onEvent(
@@ -343,7 +314,7 @@ class BreedsViewModelTest {
         advanceTimeBy(300.milliseconds)
         advanceUntilIdle()
 
-        verify(useCase).fetchBreeds(any())
+        verify(useCase).fetchBreeds(any(), any())
     }
 
     @Test
@@ -352,9 +323,9 @@ class BreedsViewModelTest {
         val vm = BreedsViewModel(useCase)
 
         whenever(
-            useCase.fetchBreeds(any())
+            useCase.fetchBreeds(any(), any())
         ).thenReturn(
-            fakeBreedsUiState(FakeBreedsUi.persian)
+            listOf(FakeBreedsUi.persian)
         )
 
         vm.onEvent(
@@ -370,7 +341,7 @@ class BreedsViewModelTest {
         advanceTimeBy(300.milliseconds)
         advanceUntilIdle()
 
-        verify(useCase).fetchBreeds(any())
+        verify(useCase).fetchBreeds(any(), any())
     }
 
     @Test
@@ -379,17 +350,14 @@ class BreedsViewModelTest {
         val vm = BreedsViewModel(useCase)
 
         whenever(
-            useCase.searchBreeds(
-                any(),
-                eq("Aby")
-            )
+            useCase.searchBreeds("Aby")
         ).thenReturn(
-            fakeBreedsUiState(FakeBreedsUi.persian)
+            listOf(FakeBreedsUi.persian)
         )
 
         vm.onEvent(BreedsEvent.SearchChanged("Aby"))
 
-        advanceTimeBy(300)
+        advanceTimeBy(300.milliseconds)
         advanceUntilIdle()
 
         vm.onEvent(BreedsEvent.SearchChanged("Aby"))
@@ -400,10 +368,8 @@ class BreedsViewModelTest {
         verify(
             useCase,
             times(1)
-        ).searchBreeds(
-            any(),
-            eq("Aby")
-        )
+        ).searchBreeds("Aby")
+
     }
 
     @Test
@@ -438,9 +404,4 @@ class BreedsViewModelTest {
             vm.state.value.selectedBreed
         )
     }
-
-    fun fakeBreedsUiState(breedUi: BreedUi) = BreedsUiState(
-            breeds = listOf(breedUi),
-            selectedBreed = breedUi
-    )
 }

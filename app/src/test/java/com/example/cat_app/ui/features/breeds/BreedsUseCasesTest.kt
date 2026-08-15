@@ -8,12 +8,12 @@ import com.example.cat_app.data.services.IFavouritesService
 import com.example.cat_app.helper.FakeBreedsModel
 import com.example.cat_app.helper.FakeBreedsUi
 import com.example.cat_app.ui.features.breeds.model.BreedUi
-import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.koin.core.context.startKoin
@@ -63,12 +63,12 @@ class BreedsUseCasesKoinTest {
 
         //When
         val useCase = BreedsUseCases()
-        val result = useCase.fetchBreeds(BreedsUiState())
+        val result = useCase.fetchBreeds(0, 0)
 
         //Assert
         val expectedBreedsList = listOf(BreedUi.fromBreedsModel(expected, false))
         assertEquals(
-            BreedsUiState(breeds = expectedBreedsList),
+            expectedBreedsList,
             result
         )
     }
@@ -94,14 +94,14 @@ class BreedsUseCasesKoinTest {
                 )
             )
 
-        val result = BreedsUseCases().fetchBreeds(BreedsUiState())
+        val result = BreedsUseCases().fetchBreeds(0,0)
 
         val expected = BreedUi.fromBreedsModel(
             persian,
             isFavorite = true
         )
 
-        assertEquals(listOf(expected), result.breeds)
+        assertEquals(listOf(expected), result)
     }
 
     @Test
@@ -113,13 +113,13 @@ class BreedsUseCasesKoinTest {
         whenever(favoriteService.getFavourites())
             .thenReturn(Result.success(emptyList<FavouriteModel>()))
 
-        val result = BreedsUseCases().fetchBreeds(BreedsUiState())
+        val result = BreedsUseCases().fetchBreeds(0,0)
 
-        assertTrue(result.breeds.isEmpty())
+        assertTrue(result?.size == 0)
     }
 
     @Test
-    fun fetchBreeds_returnsError_whenBreedServiceFails() = runTest {
+    fun fetchBreeds_returnsNull_whenBreedServiceFails() = runTest {
 
         whenever(breedService.getBreedsList(any(), any()))
             .thenReturn(Result.failure(Exception()))
@@ -127,10 +127,10 @@ class BreedsUseCasesKoinTest {
         whenever(favoriteService.getFavourites())
             .thenReturn(Result.success(emptyList<FavouriteModel>()))
 
-        val result = BreedsUseCases().fetchBreeds(BreedsUiState())
+        val result = BreedsUseCases().fetchBreeds(0,0)
 
 
-        assertTrue(result.error != null)
+        assertTrue(result == null)
     }
 
     @Test
@@ -144,37 +144,14 @@ class BreedsUseCasesKoinTest {
         whenever(favoriteService.getFavourites())
             .thenReturn(Result.failure(Exception()))
 
-        val result = BreedsUseCases().fetchBreeds(BreedsUiState())
+        val result = BreedsUseCases().fetchBreeds(0,0)
 
         val expected = BreedUi.fromBreedsModel(
             persian,
             false
         )
 
-        assertEquals(listOf(expected), result.breeds)
-    }
-
-    @Test
-    fun fetchBreeds_keepsSelectedBreed() = runTest {
-
-        val selected = BreedUi.fromBreedsModel(
-            FakeBreedsModel.persian,
-            false
-        )
-
-        whenever(breedService.getBreedsList(any(), any()))
-            .thenReturn(Result.success(emptyList<BreedsModel>()))
-
-        whenever(favoriteService.getFavourites())
-            .thenReturn(Result.success(emptyList<FavouriteModel>()))
-
-        val result = BreedsUseCases().fetchBreeds(
-            BreedsUiState(
-                selectedBreed = selected
-            )
-        )
-
-        assertEquals(selected, result.selectedBreed)
+        assertEquals(listOf(expected), result)
     }
 
     @Test
@@ -199,10 +176,10 @@ class BreedsUseCasesKoinTest {
                 )
             )
 
-        val result = BreedsUseCases().fetchBreeds(BreedsUiState())
+        val result = BreedsUseCases().fetchBreeds(0,0)
 
-        assertFalse(result.breeds[0].isFavorite)
-        assertTrue(result.breeds[1].isFavorite)
+        assertEquals(false, result?.get(0)?.isFavorite)
+        assertEquals(true, result?.get(1)?.isFavorite)
     }
 
     @Test
@@ -212,20 +189,16 @@ class BreedsUseCasesKoinTest {
             isFavorite = false
         )
 
-        val state = BreedsUiState(
-            breeds = listOf(breed)
-        )
-
         whenever(
             favoriteService.addFavourite(any())
         ).thenReturn(Result.success(null))
 
         val result = BreedsUseCases().toggleFavourite(
-            state,
-            breed.id
+            breeds = listOf(breed),
+            id = breed.id
         )
 
-        assertTrue(result.breeds.first().isFavorite)
+        assertTrue(result.first().isFavorite)
     }
 
     @Test
@@ -235,10 +208,6 @@ class BreedsUseCasesKoinTest {
             isFavorite = true
         )
 
-        val state = BreedsUiState(
-            breeds = listOf(breed)
-        )
-
         whenever(
             favoriteService.removeFavourite(breed.id)
         ).thenReturn(
@@ -246,12 +215,12 @@ class BreedsUseCasesKoinTest {
         )
 
         val result = BreedsUseCases().toggleFavourite(
-            state,
-            breed.id
+            breeds = listOf(breed),
+            id = breed.id
         )
 
         assertFalse(
-            result.breeds.first().isFavorite
+            result.first().isFavorite
         )
 
         verify(favoriteService).removeFavourite(breed.id)
@@ -271,14 +240,12 @@ class BreedsUseCasesKoinTest {
         )
 
         BreedsUseCases().toggleFavourite(
-            BreedsUiState(
-                breeds = listOf(breed)
-            ),
+            breeds = listOf(breed),
             breed.id
         )
 
         verify(favoriteService).removeFavourite(breed.id)
-        verify(favoriteService, org.mockito.kotlin.never())
+        verify(favoriteService, never())
             .addFavourite(any())
     }
 
@@ -289,10 +256,6 @@ class BreedsUseCasesKoinTest {
             isFavorite = true
         )
 
-        val state = BreedsUiState(
-            breeds = listOf(breed)
-        )
-
         whenever(
             favoriteService.removeFavourite(breed.id)
         ).thenReturn(
@@ -300,12 +263,12 @@ class BreedsUseCasesKoinTest {
         )
 
         val result = BreedsUseCases().toggleFavourite(
-            state,
+            listOf(breed),
             breed.id
         )
 
         assertTrue(
-            result.breeds.first().isFavorite
+            result.first().isFavorite
         )
     }
 
@@ -322,10 +285,8 @@ class BreedsUseCasesKoinTest {
         ).thenReturn(Result.success(null))
 
         BreedsUseCases().toggleFavourite(
-            BreedsUiState(
-                breeds = listOf(breed)
-            ),
-            breed.id
+            breeds = listOf(breed),
+            id = breed.id
         )
 
         verify(favoriteService)
@@ -352,17 +313,15 @@ class BreedsUseCasesKoinTest {
         ).thenReturn(Result.success(null))
 
         val result = BreedsUseCases().toggleFavourite(
-            BreedsUiState(
-                breeds = listOf(
-                    persian,
-                    bengal
-                )
+            breeds = listOf(
+                persian,
+                bengal
             ),
-            persian.id
+            id = persian.id
         )
 
-        assertTrue(result.breeds[0].isFavorite)
-        assertFalse(result.breeds[1].isFavorite)
+        assertTrue(result[0].isFavorite)
+        assertFalse(result[1].isFavorite)
     }
 
     @Test
@@ -376,16 +335,14 @@ class BreedsUseCasesKoinTest {
             favoriteService.addFavourite(any())
         ).thenReturn(Result.failure(Exception()))
 
-        val state = BreedsUiState(
-            breeds = listOf(breed)
-        )
+        val breeds = listOf(breed)
 
         val result = BreedsUseCases().toggleFavourite(
-            state,
-            breed.id
+            breeds= breeds,
+            id = breed.id
         )
 
-        assertEquals(state, result)
+        assertEquals(breeds, result)
     }
 
     @Test
@@ -395,16 +352,14 @@ class BreedsUseCasesKoinTest {
             isFavorite = false
         )
 
-        val state = BreedsUiState(
-            breeds = listOf(breed)
-        )
+        val breeds =  listOf(breed)
 
         val result = BreedsUseCases().toggleFavourite(
-            state,
+            breeds,
             "unknown-id"
         )
 
-        assertEquals(state, result)
+        assertEquals(breeds, result)
 
         verify(favoriteService, never())
             .addFavourite(any())
@@ -478,13 +433,11 @@ class BreedsUseCasesKoinTest {
         ).thenReturn(Result.failure(Exception()))
 
         val result = BreedsUseCases().toggleFavourite(
-            BreedsUiState(
-                breeds = listOf(breed)
-            ),
+            breeds = listOf(breed),
             breed.id
         )
 
-        assertFalse(result.breeds.first().isFavorite)
+        assertFalse(result.first().isFavorite)
     }
 
     @Test
@@ -504,19 +457,16 @@ class BreedsUseCasesKoinTest {
             Result.success(emptyList<FavouriteModel>())
         )
 
-        val result = BreedsUseCases().searchBreeds(
-            BreedsUiState(),
-            "pers"
-        )
+        val result = BreedsUseCases().searchBreeds(query = "pers")
 
         assertEquals(
             1,
-            result.breeds.size
+            result?.size
         )
 
         assertEquals(
             FakeBreedsModel.persian.id,
-            result.breeds.first().id
+            result?.first()?.id
         )
     }
 
@@ -535,12 +485,9 @@ class BreedsUseCasesKoinTest {
             Result.success(emptyList<FavouriteModel>())
         )
 
-        val result = BreedsUseCases().searchBreeds(
-            BreedsUiState(),
-            "xxxx"
-        )
+        val result = BreedsUseCases().searchBreeds(query = "xxxx")
 
-        assertTrue(result.breeds.isEmpty())
+        assertEquals(0,result?.size)
     }
 
     @Test
@@ -558,12 +505,9 @@ class BreedsUseCasesKoinTest {
             Result.success(emptyList<FavouriteModel>())
         )
 
-        val result = BreedsUseCases().searchBreeds(
-            BreedsUiState(),
-            "pers"
-        )
+        val result = BreedsUseCases().searchBreeds(query = "pers")
 
-        assertTrue(result.error != null)
+        assertNull(result)
     }
 
 

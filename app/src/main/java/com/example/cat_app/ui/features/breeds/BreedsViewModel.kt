@@ -58,19 +58,34 @@ class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
 
     private fun fetchBreeds() {
         viewModelScope.launch {
-            val newState = useCases.fetchBreeds(state = state.value)
-            _state.value = newState
+            _state.update {
+                it.copy(isLoading = true)
+            }
+            val breeds = useCases.fetchBreeds(state.value.pageSize, state.value.currentPage)
+            _state.update {
+                if (breeds != null) {
+                    it.copy(breeds = breeds, error = null, isLoading = false)
+                } else {
+                    it.copy(error = "Error fetching breeds", isLoading = false)
+                }
+            }
         }
     }
 
     private fun searchBreeds(query: String) {
-        viewModelScope.launch {
-            val newState = useCases.searchBreeds(
-                state = state.value,
-                query = query
-            )
 
-            _state.value = newState
+        viewModelScope.launch {
+            _state.update {
+                it.copy(isLoading = true)
+            }
+            val breeds = useCases.searchBreeds(query = query)
+            _state.update {
+                if (breeds != null) {
+                    it.copy(breeds = breeds, error = null, isLoading = false)
+                } else {
+                    it.copy(error = "Error fetching breeds", isLoading = false)
+                }
+            }
         }
     }
 
@@ -80,12 +95,14 @@ class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
 
     private fun toggleFavourite(breed: BreedUi) {
         viewModelScope.launch {
-            val newState = useCases.toggleFavourite(
-                state = state.value,
+            val updatedBreedsList = useCases.toggleFavourite(
+                breeds = state.value.breeds,
                 id = breed.id
             )
 
-            _state.update { newState }
+            _state.update {
+                it.copy(breeds = updatedBreedsList)
+            }
         }
     }
 

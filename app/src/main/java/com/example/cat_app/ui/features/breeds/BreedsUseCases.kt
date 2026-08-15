@@ -6,7 +6,6 @@ import com.example.cat_app.data.models.FavouriteRequestModel
 import com.example.cat_app.data.services.IBreedsService
 import com.example.cat_app.data.services.IFavouritesService
 import com.example.cat_app.ui.features.breeds.model.BreedUi
-import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -16,17 +15,17 @@ class BreedsUseCases : KoinComponent{
     val breedsService: IBreedsService by inject()
     val favouriteService: IFavouritesService by inject()
 
-    suspend fun fetchBreeds(state: BreedsUiState): BreedsUiState {
+    suspend fun fetchBreeds(pageSize: Int, currentPage: Int): List<BreedUi>? {
         val breeds = breedsService.getBreedsList(
-            limit = state.pageSize,
-            page = state.currentPage
+            limit = pageSize,
+            page = currentPage
         )
 
         val favourites = favouriteService.getFavourites()
 
         return when {
-            breeds.isSuccess -> buildBreedUiStateFromCurrentState(breeds, favourites, state)
-            else -> BreedsUiState(error = "Failed to load breeds")
+            breeds.isSuccess -> buildBreedUiStateFromCurrentState(breeds, favourites)
+            else -> null
         }
     }
 
@@ -35,40 +34,34 @@ class BreedsUseCases : KoinComponent{
         return favourites?.any { fav -> fav.imageId == breed.image?.id } ?: false
     }
 
-    suspend fun searchBreeds(state: BreedsUiState, query: String): BreedsUiState {
+    suspend fun searchBreeds(query: String): List<BreedUi>? {
         val breeds = breedsService.searchBreeds(query)
         val favourites = favouriteService.getFavourites()
 
         return when {
-            breeds.isSuccess -> buildBreedUiStateFromCurrentState(breeds, favourites, state)
-            else -> BreedsUiState(error = "Failed to load breeds")
+            breeds.isSuccess -> buildBreedUiStateFromCurrentState(breeds, favourites)
+            else -> null
         }
-
     }
 
     private fun buildBreedUiStateFromCurrentState(
         breeds: Result<List<BreedsModel>>,
-        favourites: Result<List<FavouriteModel>>,
-        state: BreedsUiState
-    ): BreedsUiState {
-        val breedUiList = breeds.getOrThrow()
+        favourites: Result<List<FavouriteModel>>
+    ): List<BreedUi> {
+        return breeds.getOrThrow()
             .map {
                 BreedUi.fromBreedsModel(
                     it,
                     isBreedFavourite(it, favourites.getOrNull())
                 )
             }
-
-        return state.copy(
-            breeds = breedUiList
-        )
     }
 
-    suspend fun toggleFavourite(state: BreedsUiState, id: String): BreedsUiState {
+    suspend fun toggleFavourite(breeds: List<BreedUi>, id: String): List<BreedUi> {
 
-        val breed = state.breeds
+        val breed = breeds
             .find { it.id == id }
-            ?: return state
+            ?: return breeds
 
         val updatedIsFavorite =
             if (breed.isFavorite) {
@@ -77,15 +70,14 @@ class BreedsUseCases : KoinComponent{
                 addFavourite(id)
             }
 
-        return state.copy(
-            breeds = state.breeds.map { breed ->
+        return breeds.map { breed ->
                 if (breed.id == id) {
                     breed.copy(isFavorite = updatedIsFavorite)
                 }
                 else {
                     breed
                 }
-            })
+            }
 
     }
 
@@ -109,7 +101,4 @@ class BreedsUseCases : KoinComponent{
             true
         }
     }
-
-
-
 }
