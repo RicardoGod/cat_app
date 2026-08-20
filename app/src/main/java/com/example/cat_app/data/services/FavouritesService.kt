@@ -31,7 +31,7 @@ class FavouritesService : IFavouritesService, KoinComponent {
         }
     }
 
-    override suspend fun removeFavourite(favouriteId: String): Result<Unit?> {
+    override suspend fun removeFavourite(favouriteId: Int): Result<Unit?> {
         try {
             val catsApiResponse = catsApi.removeFavourite(favouriteId).body()
             return Result.success(catsApiResponse)

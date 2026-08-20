@@ -35,7 +35,6 @@ import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenBreeds(
-    search: String,
     state: BreedsUiState,
     onEvent: (BreedsEvent) -> Unit,
     navigateBack: () -> Unit
@@ -44,6 +43,13 @@ fun ScreenBreeds(
     LaunchedEffect(Unit) {
         onEvent(BreedsEvent.LoadingScreen)
     }
+
+    TextField(
+        value = state.search,
+        onValueChange = {
+            onEvent(BreedsEvent.SearchChanged(it))
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -61,7 +67,7 @@ fun ScreenBreeds(
         Column(modifier = Modifier.padding(paddingValues)) {
             //search bar
             OutlinedTextField(
-                value = search,
+                value = state.search,
                 onValueChange = { onEvent(BreedsEvent.SearchChanged(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,7 +76,7 @@ fun ScreenBreeds(
                 label = { Text("Search breed...") },
                 singleLine = true,
                 trailingIcon = {
-                    if (search.isNotBlank()) {
+                    if (state.search.isNotBlank()) {
                         IconButton(
                             onClick = {
                                 onEvent(BreedsEvent.ClearSearch)

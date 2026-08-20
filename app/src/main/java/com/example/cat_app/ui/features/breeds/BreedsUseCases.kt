@@ -68,51 +68,13 @@ class BreedsUseCases : KoinComponent{
     }
 
     suspend fun toggleFavourite(state: BreedsUiState, id: String): BreedsUiState {
-
-        val breed = state.breeds
-            .find { it.id == id }
-            ?: return state
-
-        val updatedIsFavorite =
-            if (breed.isFavorite) {
-                removeFavourite(id)
-            } else {
-                addFavourite(id)
-            }
-
-        return state.copy(
-            breeds = state.breeds.map { breed ->
-                if (breed.id == id) {
-                    breed.copy(isFavorite = updatedIsFavorite)
-                }
-                else {
-                    breed
-                }
-            })
-
-    }
-
-    suspend fun addFavourite(id: String): Boolean{
         val request = FavouriteRequestModel(id)
-        val result = favouriteService.addFavourite(request)
+        favouriteService.addFavourite(request)
 
-        return if (result.isSuccess) {
-            true
-        } else {
-            false
-        }
+        state.breeds
+            .find { breedUi -> breedUi.id == id }
+            ?.let { breedUi -> breedUi.isFavorite = true }
+
+        return state
     }
-
-    suspend fun removeFavourite(id: String): Boolean{
-        val result = favouriteService.removeFavourite(id)
-
-        return if (result.isSuccess) {
-            false
-        } else {
-            true
-        }
-    }
-
-
-
 }
