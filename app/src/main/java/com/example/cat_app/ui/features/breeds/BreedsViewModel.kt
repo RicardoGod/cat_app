@@ -51,7 +51,7 @@ class BreedsViewModel(private val useCases: BreedsUseCases) : ViewModel() {
             is BreedsEvent.LoadingScreen -> fetchBreeds()
             is BreedsEvent.BreedClicked -> selectBreed(event.breed)
             is BreedsEvent.CloseDialog -> unselectBreed()
-            is BreedsEvent.SearchChanged -> updateSearchQueryValue(event.value)
+            is BreedsEvent.SearchChanged -> updateSearchQueryValue(event.text)
             is BreedsEvent.ToggleFavorite -> toggleFavourite(event.breed)
             is BreedsEvent.ClearSearch -> updateSearchQueryValue("")
         }
