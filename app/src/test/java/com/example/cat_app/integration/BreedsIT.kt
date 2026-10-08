@@ -4,8 +4,8 @@ import com.example.cat_app.data.api.CatsApiService
 import com.example.cat_app.data.services.servicesModule
 import com.example.cat_app.ui.components
 import com.example.cat_app.ui.features.breeds.BreedsUseCases
-import com.example.cat_app.ui.features.breeds.model.BreedsUiState
 import com.google.gson.GsonBuilder
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -19,7 +19,6 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import junit.framework.TestCase.assertEquals
 
 class BreedsIT {
 
@@ -127,16 +126,16 @@ class BreedsIT {
         )
 
         val result = BreedsUseCases()
-            .fetchBreeds(BreedsUiState())
+            .fetchBreeds(0, 0)
 
-        assertEquals(1, result.breeds.size)
+        assertEquals(1, result?.size)
 
-        val breed = result.breeds.first()
+        val breed = result?.first()
 
-        assertEquals("abys", breed.id)
-        assertEquals("Abyssinian", breed.name)
-        assertEquals("Egypt", breed.origin)
-        assertEquals(false, breed.isFavorite)
+        assertEquals("abys", breed?.id)
+        assertEquals("Abyssinian", breed?.name)
+        assertEquals("Egypt", breed?.origin)
+        assertEquals(false, breed?.isFavorite)
 
         assertEquals(2, server.requestCount)
 
